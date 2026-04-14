@@ -63,8 +63,6 @@ docker run -d \
 | `PUID` | `1000` | User ID to run the server process as |
 | `PGID` | `1000` | Group ID to run the server process as |
 | `UPDATE_ON_START` | `true` | Download and validate server files on every startup. Set to `false` to skip |
-| `STEAM_USER` | | Steam account username (required to download the dedicated server) |
-| `STEAM_PASS` | | Steam account password |
 | `INVITE_CODE` | | Invite code players use to connect. Min 6 characters, `0-9 a-z A-Z`, case sensitive |
 | `SERVER_NAME` | | Display name for your server |
 | `SERVER_PASSWORD` | | Leave empty for a public server |
