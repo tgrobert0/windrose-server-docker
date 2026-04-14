@@ -60,26 +60,30 @@ if [ ! -f "$SERVER_DESC" ]; then
     sleep 2
 fi
 
-LogAction "Patching server config"
-tr -d '\r' < "$SERVER_DESC" | jq \
-    --arg proxy      "${P2P_PROXY_ADDRESS:-127.0.0.1}" \
-    --arg invite     "${INVITE_CODE}" \
-    --arg name       "${SERVER_NAME}" \
-    --arg password   "${SERVER_PASSWORD:-}" \
-    --argjson maxplayers "${MAX_PLAYERS:-10}" \
-    '
-    .ServerDescription_Persistent.P2pProxyAddress = $proxy |
-    if $invite   != "" then .ServerDescription_Persistent.InviteCode           = $invite   else . end |
-    if $name     != "" then .ServerDescription_Persistent.ServerName           = $name     else . end |
-    if $password != "" then
-        .ServerDescription_Persistent.IsPasswordProtected = true |
-        .ServerDescription_Persistent.Password = $password
-    else
-        .ServerDescription_Persistent.IsPasswordProtected = false
-    end |
-    .ServerDescription_Persistent.MaxPlayerCount = $maxplayers
-    ' > "${SERVER_DESC}.tmp" && mv "${SERVER_DESC}.tmp" "$SERVER_DESC"
-LogSuccess "Server config patched"
+if [ "${GENERATE_SETTINGS:-true}" = "false" ]; then
+    LogInfo "GENERATE_SETTINGS=false — skipping server config patch, using ServerDescription.json as-is"
+else
+    LogAction "Patching server config"
+    tr -d '\r' < "$SERVER_DESC" | jq \
+        --arg proxy      "${P2P_PROXY_ADDRESS:-127.0.0.1}" \
+        --arg invite     "${INVITE_CODE}" \
+        --arg name       "${SERVER_NAME}" \
+        --arg password   "${SERVER_PASSWORD:-}" \
+        --argjson maxplayers "${MAX_PLAYERS:-10}" \
+        '
+        .ServerDescription_Persistent.P2pProxyAddress = $proxy |
+        if $invite   != "" then .ServerDescription_Persistent.InviteCode           = $invite   else . end |
+        if $name     != "" then .ServerDescription_Persistent.ServerName           = $name     else . end |
+        if $password != "" then
+            .ServerDescription_Persistent.IsPasswordProtected = true |
+            .ServerDescription_Persistent.Password = $password
+        else
+            .ServerDescription_Persistent.IsPasswordProtected = false
+        end |
+        .ServerDescription_Persistent.MaxPlayerCount = $maxplayers
+        ' > "${SERVER_DESC}.tmp" && mv "${SERVER_DESC}.tmp" "$SERVER_DESC"
+    LogSuccess "Server config patched"
+fi
 
 LogInfo "Server is starting..."
 
